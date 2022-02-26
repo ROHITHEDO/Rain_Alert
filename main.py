@@ -1,18 +1,19 @@
 import requests
-
+import os
 from twilio.rest import Client
+from twilio.http.http_client import TwilioHttpClient
 
 OWM_Endpoint= "http://api.openweathermap.org/data/2.5/onecall"
-api_key="9b8cd119d1919cc83fdb63111dc83aa2"
+api_key=os.environ.get("API_KEY")
 
-account_sid="AC60eff66308de9fd57e9aa831709166dc"
+account_sid=os.environ.get("ACCOUNT_SID")
 #account details
-auth_token= "d7949e2dc9e684d0b6fa1efcdb79894a"
+auth_token= os.environ.get("AUTH_TOKEN")
 
 weather_params= {
 
-    "lat": -0.949174,
-    "lon": 21.971463,
+    "lat": 30.884729,
+    "lon": 76.684692,
     "appid": api_key,
     "exclude": "current,minute,daily"
     #coz we care about now hourly data and not past/future
@@ -32,10 +33,12 @@ for hour_data in weather_slice:
         will_rain=True
 
 if will_rain:
+    proxy_client=TwilioHttpClient()
+    proxy_client.session.proxies={'https': os.environ['https_proxy']}
     #message sending format
-    client = Client("AC60eff66308de9fd57e9aa831709166dc", "d7949e2dc9e684d0b6fa1efcdb79894a")
+    client = Client(account_sid,auth_token,http_client=proxy_client)
     message = client.messages.create(
-        to="+919056253201", 
+        to=os.environ.get("MY_NO"),
         from_="+19205261323",
         body="carry umbrella☔, it might rain today")
     print(message.status)
